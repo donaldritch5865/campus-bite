@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--bg-main);
+  --color-surface: var(--bg-surface);
+  --color-surface-elevated: var(--bg-surface-elevated);
+  --color-main: var(--text-main);
+  --color-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-glass: var(--glass-bg);
+}
+
+@layer base {
+  :root {
+    --bg-main: #FFF7EE; /* Warm luxurious ivory */
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F9EFE4;
+    --text-main: #1C1917;
+    --text-muted: #6B5B51;
+    --border-subtle: rgba(0, 0, 0, 0.06);
+    --glass-bg: rgba(255, 255, 255, 0.4);
+
+    --color-amber-500: #FF7A00;
+    --color-amber-600: #FF5C00;
+    --color-sunset-start: #FF7A00;
+    --color-sunset-end: #E64A19;
+  }
+
+  .dark {
+    --bg-main: #0B0704; /* Ultra deep espresso */
+    --bg-surface: #140C07;
+    --bg-surface-elevated: #1D120B;
+    --text-main: #FFFFFF;
+    --text-muted: #9F938C;
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --glass-bg: rgba(20, 12, 7, 0.4);
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.5s ease, color 0.5s ease;
+    letter-spacing: -0.01em;
+  }
+
+  /* Custom Premium Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-main);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-surface-elevated);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #FF5C00;
+  }
+}
+
+/* Atmospheric Glow Shadows & Lights matching Spotify Dark & Café Aesthetics */
+.bg-cinematic-vignette {
+  background: radial-gradient(circle at center, transparent 30%, var(--bg-main) 100%);
+}
+
+.ambient-hero-glow {
+  background: radial-gradient(circle at 45% 30%, rgba(255, 92, 0, 0.18) 0%, rgba(255, 60, 0, 0.08) 25%, transparent 60%);
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.ambient-image-glow {
+  background: radial-gradient(circle at 60% 50%, rgba(255, 122, 0, 0.22) 0%, rgba(255, 92, 0, 0.09) 35%, transparent 65%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+/* Light mode overrides for blend modes to ensure deep cinematic integration instead of milky washing out */
+.dark .ambient-hero-glow, .dark .ambient-image-glow {
+  mix-blend-mode: color-dodge;
+}
+
+.underline-accent {
+  position: relative;
+  display: inline-block;
+}
+.underline-accent::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0.05em;
+  width: 100%;
+  height: 0.12em;
+  background: #FF5C00;
+  box-shadow: 0 0 10px rgba(255, 92, 0, 0.6);
+}
+
+.glow-card-border {
+  border: 1px solid var(--border-subtle);
+}
+
+.glow-card-border:hover {
+  border-color: rgba(255, 92, 0, 0.2);
+}
+
+/* Premium frosted glassmorphism utility classes */
+.glass-navbar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(32px) saturate(150%);
+  -webkit-backdrop-filter: blur(32px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 40px -10px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.dark .glass-navbar {
+  background: rgba(14, 9, 6, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 50px -15px rgba(0,0,0,0.8), 0 0 20px rgba(255, 92, 0, 0.03), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.glass-panel-heavy {
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px) saturate(150%);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.dark .glass-panel-heavy {
+  background: rgba(20, 12, 8, 0.6);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.glass-card-dark {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-dark:hover {
+  transform: translateY(-6px);
+  background: var(--bg-surface-elevated);
+  border-color: rgba(255, 92, 0, 0.25);
+  box-shadow: 0 20px 40px -10px rgba(255, 92, 0, 0.15), 0 15px 25px -5px rgba(0,0,0,0.3);
+}
+
+/* Text sunset linear gradient */
+.text-gradient-sunset {
+  background: linear-gradient(135deg, #FF7A00 0%, #FF5C00 50%, #E64A19 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-sunset {
+  background: linear-gradient(135deg, #FF7A00 0%, #FF5C00 100%);
+}
+
+.bg-gradient-sunset-hover {
+  background: linear-gradient(135deg, #FF9E40 0%, #FF7A00 100%);
+}
+
+/* Swipe horizontal layout utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Reset vite basic app styles in index.css so it doesn't break our setup */
+#root {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  border: none;
+  background: var(--bg-main);
+}
+
+/* Micro-animations */
+@keyframes slowFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.slow-float {
+  animation: slowFloat 5s infinite ease-in-out;
+}
+
+.slow-float-delayed {
+  animation: slowFloat 5.5s infinite ease-in-out;
+  animation-delay: 1.5s;
+}
