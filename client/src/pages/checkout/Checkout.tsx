@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '@/context/AppContext';
-import { CAMPUSES } from '@/mock/mockData';
+import { CAMPUSES, CORPORATE_LOCATIONS } from '@/mock/mockData';
 import { MapPin, Clock, CreditCard, ShieldCheck, Ticket, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { CutoffTimer } from '@/components/ui/CutoffTimer';
+import { PickupStationCard } from '@/components/ui/PickupStationCard';
 import { motion } from 'framer-motion';
 
 export const Checkout: React.FC = () => {
@@ -18,10 +20,8 @@ export const Checkout: React.FC = () => {
 
   const [step, setStep] = useState(1);
   const [selectedCampus, setSelectedCampus] = useState(user.campusId);
-  const [selectedBuilding, setSelectedBuilding] = useState(user.building);
-  const [roomDetails, setRoomDetails] = useState('');
-  const [deliveryNotes, setDeliveryNotes] = useState('Please leave outside library gates.');
-  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('now');
+  const [selectedBuilding, setSelectedBuilding] = useState(user.building); // This is now the Pickup Station
+  const [pickupWindow, setPickupWindow] = useState(user.userType === 'student' ? 'lunch12' : 'lunch1');
   const [paymentMethod, setPaymentMethod] = useState('thawani');
 
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -47,7 +47,7 @@ export const Checkout: React.FC = () => {
   }
 
   const handlePlaceOrder = () => {
-    const fullNotes = `${roomDetails ? `Block/Room: ${roomDetails}. ` : ''}${deliveryNotes}`;
+    const fullNotes = `Pickup Station: ${selectedBuilding} at ${pickupWindow}`;
     
     // Convert payment key to readable string
     const paymentLabelMap: { [key: string]: string } = {
@@ -61,14 +61,19 @@ export const Checkout: React.FC = () => {
     navigate('/tracking');
   };
 
-  const currentCampusObj = CAMPUSES.find(c => c.id === selectedCampus) || CAMPUSES[0];
+  const availableLocations = user.userType === 'student' ? CAMPUSES : CORPORATE_LOCATIONS;
+  const currentCampusObj = availableLocations.find(c => c.id === selectedCampus) || availableLocations[0];
 
-  const timeSlots = [
-    { id: 'now', name: 'Deliver immediately', desc: '~18 min average ETA' },
-    { id: 'break10', name: '10:00 AM Break', desc: 'Lecture Break 1 delivery' },
-    { id: 'lunch12', name: '12:30 PM Lunch', desc: 'Midday breaks block' },
-    { id: 'study8', name: '8:00 PM Study Fuel', desc: 'Late night library sessions' }
-  ];
+  const timeSlots = user.userType === 'student' 
+    ? [
+        { id: 'break10', name: '10:00 AM Break', desc: 'Lecture Break 1 collection' },
+        { id: 'lunch12', name: '12:30 PM Lunch', desc: 'Main lunch collection window' },
+        { id: 'lunch1', name: '1:30 PM Late Lunch', desc: 'Afternoon breaks block' },
+        { id: 'study8', name: '8:00 PM Dinner', desc: 'Late night library sessions' }
+      ]
+    : [
+        { id: 'lunch1', name: '1:00 PM Lunch', desc: 'Corporate lunch collection window' }
+      ];
 
   const paymentGateways = [
     { id: 'thawani', name: 'Thawani Wallet', desc: 'Fast Omani payments', icon: '📱' },
@@ -91,9 +96,12 @@ export const Checkout: React.FC = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="space-y-0.5">
-            <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-wider">Checkout Flow</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-main leading-none">Student Fuel Checkout</h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 flex-1">
+            <div className="space-y-0.5">
+              <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-wider">Checkout Flow</span>
+              <h2 className="text-2xl sm:text-3xl font-black text-main leading-none">Student Fuel Checkout</h2>
+            </div>
+            <CutoffTimer cutoffTimeStr="11:00 AM" size="md" className="mb-0.5" />
           </div>
         </div>
 
@@ -126,20 +134,20 @@ export const Checkout: React.FC = () => {
                         onChange={(e) => {
                           setSelectedCampus(e.target.value);
                           // Reset building to first item of new campus
-                          const newCampus = CAMPUSES.find(c => c.id === e.target.value) || CAMPUSES[0];
+                          const newCampus = availableLocations.find(c => c.id === e.target.value) || availableLocations[0];
                           setSelectedBuilding(newCampus.buildings[0]);
                         }}
                         className="w-full px-4 py-3.5 rounded-xl text-xs bg-surface border border-subtle text-main focus:outline-none focus:border-amber-500 appearance-none"
                       >
-                        {CAMPUSES.map(c => (
+                        {availableLocations.map(c => (
                           <option key={c.id} value={c.id}>{c.name} - {c.fullName}</option>
                         ))}
                       </select>
                     </div>
 
-                    {/* Building selection */}
+                    {/* Station selection */}
                     <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-muted tracking-wider">Delivery Building</label>
+                      <label className="text-xs font-black uppercase text-muted tracking-wider">Pickup Station</label>
                       <select
                         value={selectedBuilding}
                         onChange={(e) => setSelectedBuilding(e.target.value)}
@@ -152,47 +160,21 @@ export const Checkout: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Room/Class details */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-muted tracking-wider">Class/Room Details</label>
-                      <input
-                        type="text"
-                        placeholder="E.g. Engineering block B Room 204"
-                        value={roomDetails}
-                        onChange={(e) => setRoomDetails(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-xl text-xs bg-surface border border-subtle text-main focus:outline-none"
-                      />
-                    </div>
-
-                    {/* Drop notes */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-muted tracking-wider">Instructions for Driver</label>
-                      <input
-                        type="text"
-                        placeholder="Leave outside library entrance..."
-                        value={deliveryNotes}
-                        onChange={(e) => setDeliveryNotes(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-xl text-xs bg-surface border border-subtle text-main focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
                   <button
                     type="button"
                     onClick={() => setStep(2)}
-                    className="mt-2 px-5 py-3 bg-gradient-sunset text-white rounded-xl text-xs font-black uppercase tracking-wider"
+                    className="mt-4 px-5 py-3 bg-gradient-sunset text-white rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto"
                   >
-                    Confirm Drop Spot
+                    Confirm Pickup Location
                   </button>
                 </div>
               ) : (
-                <div className="text-xs text-main/80 flex items-center gap-2 pt-1 font-semibold leading-normal">
-                  <MapPin className="w-4 h-4 text-amber-500" />
-                  <span>
-                    Delivering to <strong>{currentCampusObj.fullName} ({selectedBuilding})</strong>. {roomDetails && `Room: ${roomDetails}.`}
-                  </span>
-                </div>
+                <PickupStationCard
+                  campusName={currentCampusObj.name}
+                  stationName={selectedBuilding}
+                  pickupWindow="To be selected"
+                  className="mt-4"
+                />
               )}
             </div>
 
@@ -201,7 +183,7 @@ export const Checkout: React.FC = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-extrabold text-base text-main flex items-center gap-2.5">
                   <span className="w-6 h-6 rounded-lg bg-gradient-sunset text-white text-xs font-black flex items-center justify-center">2</span>
-                  Delivery Time Slot
+                  Collection Window
                 </h3>
                 {step > 2 && (
                   <button onClick={() => setStep(2)} className="text-xs text-amber-500 font-black uppercase">Edit</button>
@@ -215,9 +197,9 @@ export const Checkout: React.FC = () => {
                       <button
                         key={ts.id}
                         type="button"
-                        onClick={() => setDeliveryTimeSlot(ts.id)}
+                        onClick={() => setPickupWindow(ts.id)}
                         className={`p-3 rounded-2xl border text-left transition-all ${
-                          deliveryTimeSlot === ts.id
+                          pickupWindow === ts.id
                             ? 'bg-amber-500/10 border-amber-500'
                             : 'bg-surface border-subtle hover:border-subtle'
                         }`}
@@ -234,20 +216,20 @@ export const Checkout: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="px-5 py-3 bg-gradient-sunset text-white rounded-xl text-xs font-black uppercase tracking-wider"
+                    className="mt-4 px-5 py-3 bg-gradient-sunset text-white rounded-xl text-xs font-black uppercase tracking-wider w-full sm:w-auto"
                   >
-                    Confirm Delivery Time
+                    Confirm Collection Time
                   </button>
                 </div>
               )}
 
               {step > 2 && (
-                <div className="text-xs text-main/80 flex items-center gap-2 pt-1 font-semibold">
-                  <Clock className="w-4 h-4 text-amber-500" />
-                  <span>
-                    Schedule: <strong>{timeSlots.find(t => t.id === deliveryTimeSlot)?.name}</strong>
-                  </span>
-                </div>
+                <PickupStationCard
+                  campusName={currentCampusObj.name}
+                  stationName={selectedBuilding}
+                  pickupWindow={timeSlots.find(t => t.id === pickupWindow)?.name || ''}
+                  className="mt-4"
+                />
               )}
             </div>
 
@@ -317,7 +299,7 @@ export const Checkout: React.FC = () => {
                     <div className="text-left min-w-0">
                       <div className="font-extrabold text-main truncate">{item.name}</div>
                       <div className="text-[10px] text-muted mt-0.5">
-                        Qty: {item.quantity} • {item.restaurantName}
+                        Qty: {item.quantity} • {item.kitchenName}
                       </div>
                     </div>
                     <span className="font-black text-main shrink-0">
@@ -352,9 +334,9 @@ export const Checkout: React.FC = () => {
                 )}
 
                 <div className="flex justify-between text-muted">
-                  <span>Delivery Fee</span>
+                  <span>Pickup Fee</span>
                   <span className="font-semibold text-main">
-                    {deliveryFee === 0 ? 'FREE' : `OMR ${deliveryFee.toFixed(3)}`}
+                    FREE
                   </span>
                 </div>
 

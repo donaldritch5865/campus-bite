@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { FOOD_ITEMS, FoodItem } from '@/mock/mockData';
-import { Star, Clock, Heart, ShoppingBag } from 'lucide-react';
-import { FoodModal } from '@/components/modals/FoodModal';
+import { Star, Clock, Heart, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export const Favorites: React.FC = () => {
+export const SavedMeals: React.FC = () => {
   const navigate = useNavigate();
   const { favorites, toggleFavorite } = useApp();
-  const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
 
   const favoriteDishes = FOOD_ITEMS.filter(f => favorites.includes(f.id));
 
@@ -20,12 +18,12 @@ export const Favorites: React.FC = () => {
         
         {/* Header */}
         <div className="space-y-1">
-          <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">Your library</span>
+          <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">Quick Reorder</span>
           <h2 className="text-3xl sm:text-4xl font-black text-main tracking-tight">
-            Your Favorite <span className="text-gradient-sunset">Study Fuels</span>
+            Your Saved <span className="text-gradient-sunset">Campus Meals</span>
           </h2>
           <p className="text-muted text-xs sm:text-sm leading-relaxed max-w-xl">
-            Quick access to your regular orders. Keep the Karak hot and the wraps ready!
+            Quick access to your regular orders. Guarantee your portion before the daily cut-off time!
           </p>
         </div>
 
@@ -35,13 +33,13 @@ export const Favorites: React.FC = () => {
             <span className="text-5xl slow-float block">❤️</span>
             <h4 className="font-extrabold text-main text-base">Your library is empty</h4>
             <p className="text-xs text-muted max-w-xs mx-auto">
-              Add products from campus cafes to your favorites list for instant ordering later!
+              Add meals from the daily menu to your saved list for instant pre-ordering later!
             </p>
             <button
               onClick={() => navigate('/restaurants')}
               className="px-5 py-2.5 bg-gradient-sunset text-white font-black rounded-xl text-xs uppercase tracking-wider transition-all"
             >
-              Explore Cafes
+              Explore Daily Menu
             </button>
           </div>
         ) : (
@@ -51,7 +49,7 @@ export const Favorites: React.FC = () => {
               return (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedItem(item)}
+                  onClick={() => navigate(`/meal/${item.id}`)}
                   className="group rounded-3xl glass-card overflow-hidden cursor-pointer flex flex-col justify-between"
                 >
                   <div className="relative h-44 overflow-hidden">
@@ -71,6 +69,12 @@ export const Favorites: React.FC = () => {
                     >
                       <Heart className="w-4 h-4 fill-red-500 text-red-500" />
                     </button>
+
+                    {/* Pre-order cutoff Pill */}
+                    <span className="absolute bottom-4 left-4 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-red-500/80 backdrop-blur-sm border border-red-500/20 text-white flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 text-white" />
+                      Order before {item.orderCutoff}
+                    </span>
                   </div>
 
                   <div className="p-4 space-y-3 text-left flex-1 flex flex-col justify-between">
@@ -86,7 +90,7 @@ export const Favorites: React.FC = () => {
                       </div>
                       
                       <p className="text-[10px] text-muted font-semibold">
-                        {item.restaurantName}
+                        {item.kitchenName} • {item.calories} kcal
                       </p>
                     </div>
 
@@ -97,11 +101,11 @@ export const Favorites: React.FC = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setSelectedItem(item);
+                          navigate(`/meal/${item.id}`);
                         }}
-                        className="px-3 py-1.5 bg-surface border border-subtle text-main/80 hover:text-main rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                        className="px-3 py-1.5 bg-surface border border-subtle text-main/80 hover:text-main rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1 hover:border-amber-500/30"
                       >
-                        <ShoppingBag className="w-3.5 h-3.5" /> Customize
+                        Order Again <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -114,11 +118,6 @@ export const Favorites: React.FC = () => {
 
       </div>
 
-      <FoodModal
-        item={selectedItem}
-        onClose={() => setSelectedItem(null)}
-      />
     </div>
   );
 };
-export default Favorites;

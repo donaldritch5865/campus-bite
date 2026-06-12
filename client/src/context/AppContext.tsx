@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { FoodItem, RESTAURANTS, FOOD_ITEMS } from '@/mock/mockData';
+import { FoodItem, FOOD_ITEMS } from '@/mock/mockData';
 
 export type UserRole = 'student' | 'vendor' | 'admin';
+
+export type OrderMode = 'scheduled' | 'force_open' | 'force_close';
 
 export interface CartItem {
   cartId: string; // unique cart line id
@@ -11,7 +13,7 @@ export interface CartItem {
   quantity: number;
   image: string;
   restaurantId: string;
-  restaurantName: string;
+  kitchenName: string;
   addonsSelected: { name: string; price: number }[];
   specialNotes?: string;
 }
@@ -19,7 +21,7 @@ export interface CartItem {
 export interface ActiveOrder {
   id: string;
   items: CartItem[];
-  status: 'confirmed' | 'preparing' | 'delivering' | 'arrived';
+  status: 'confirmed' | 'preparing' | 'packed' | 'transported' | 'ready' | 'collected';
   eta: number;
   campusId: string;
   building: string;
@@ -33,11 +35,24 @@ export interface ActiveOrder {
 }
 
 interface UserProfile {
+  userType: 'student' | 'bank_employee';
   name: string;
-  email: string;
-  university: string;
-  campusId: string;
-  building: string;
+  email: string; // Student or Corporate Email
+  mobileNumber?: string; // Common field
+  
+  // Student Specific
+  studentId?: string;
+  university?: string;
+  
+  // Bank Employee Specific
+  employeeId?: string;
+  bankName?: string;
+  
+  // Shared Operational
+  campusId: string; // ID of the campus or corporate location
+  building: string; // Name of the pickup station
+  
+  // Gamification & Wallet
   streak: number;
   level: 'Bronze' | 'Silver' | 'Gold';
   balance: number;
@@ -71,14 +86,20 @@ interface AppContextType {
   addNotification: (text: string) => void;
   markNotificationsRead: () => void;
   vendorOrders: ActiveOrder[];
-  updateVendorOrderStatus: (orderId: string, status: 'confirmed' | 'preparing' | 'delivering' | 'arrived') => void;
+  updateVendorOrderStatus: (orderId: string, status: 'confirmed' | 'preparing' | 'packed' | 'transported' | 'ready' | 'collected') => void;
+  orderMode: OrderMode;
+  setOrderMode: React.Dispatch<React.SetStateAction<OrderMode>>;
+  isSystemOpen: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const defaultUser: UserProfile = {
+  userType: 'student',
   name: "Mazen Al-Bulushi",
   email: "mazen.b@squ.edu.om",
+  mobileNumber: "+968 9123 4567",
+  studentId: "SQU12345",
   university: "Sultan Qaboos University",
   campusId: "squ",
   building: "Main Library Hall",
@@ -92,7 +113,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [role, setRoleState] = useState<UserRole>('student');
   const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('cb_user');
-    return saved ? JSON.parse(saved) : defaultUser;
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge with defaultUser to ensure new fields like userType exist for old local storage
+      return { ...defaultUser, ...parsed, userType: parsed.userType || 'student' };
+    }
+    return defaultUser;
   });
   const [cart, setCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('cb_cart');
@@ -118,9 +144,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : true;
   });
 
+  const [orderMode, setOrderMode] = useState<OrderMode>(() => {
+    const saved = localStorage.getItem('cb_order_mode');
+    return saved ? JSON.parse(saved) : 'scheduled';
+  });
+
+  const [isSystemOpen, setIsSystemOpen] = useState(true);
+
+  useEffect(() => {
+    const checkSystemStatus = () => {
+      if (orderMode === 'force_open') {
+        setIsSystemOpen(true);
+      } else if (orderMode === 'force_close') {
+        setIsSystemOpen(false);
+      } else {
+        // scheduled mode: open from 12 AM (00:00) to 11 AM (11:00)
+        const now = new Date();
+        const hour = now.getHours();
+        setIsSystemOpen(hour >= 0 && hour < 11);
+      }
+    };
+
+    checkSystemStatus();
+    const interval = setInterval(checkSystemStatus, 60000);
+    return () => clearInterval(interval);
+  }, [orderMode]);
+
+  useEffect(() => {
+    localStorage.setItem('cb_order_mode', JSON.stringify(orderMode));
+  }, [orderMode]);
+
   const [notifications, setNotifications] = useState([
-    { id: "1", text: "🔥 Mazen! SQU Engineering has 12 items ordered from Levant Grill today!", time: "5 min ago", read: false },
-    { id: "2", text: "☕ Souq Café study deals are live! Free Karak after 10 PM tonight.", time: "1 hr ago", read: true }
+    { id: "1", text: "🔥 Mazen! SQU Engineering has 12 orders for Chicken Biryani today!", time: "5 min ago", read: false },
+    { id: "2", text: "☕ Iced Saffron Latte is now available for pre-order!", time: "1 hr ago", read: true }
   ]);
 
   // Vendor order simulation state
@@ -211,8 +267,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         price: unitPrice,
         quantity,
         image: item.image,
-        restaurantId: item.restaurantId,
-        restaurantName: item.restaurantName,
+        restaurantId: item.kitchenName, // Used for routing compatibility if needed, else kitchenName
+        kitchenName: item.kitchenName,
         addonsSelected: addons,
         specialNotes: notes
       };
@@ -338,19 +394,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (activeOrder) {
       const completed: ActiveOrder = {
         ...activeOrder,
-        status: 'arrived',
+        status: 'collected',
         eta: 0
       };
       setPastOrders(prev => [completed, ...prev]);
       setActiveOrder(null);
-      addNotification("🎁 Order Delivered! Your study fuel has arrived. Eat up! 😋");
+      addNotification("🎁 Meal Collected! Enjoy your campus bite! 😋");
     }
   };
 
   // Vendor action simulation
   const updateVendorOrderStatus = (
     orderId: string,
-    status: 'confirmed' | 'preparing' | 'delivering' | 'arrived'
+    status: 'confirmed' | 'preparing' | 'packed' | 'transported' | 'ready' | 'collected'
   ) => {
     setVendorOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
     
@@ -358,8 +414,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (activeOrder && activeOrder.id === orderId) {
       let etaVal = activeOrder.eta;
       if (status === 'preparing') etaVal = 6;
-      if (status === 'delivering') etaVal = 3;
-      if (status === 'arrived') etaVal = 0;
+      if (status === 'packed') etaVal = 4;
+      if (status === 'transported') etaVal = 2;
+      if (status === 'ready') etaVal = 0;
+      if (status === 'collected') etaVal = 0;
 
       setActiveOrder(prev => {
         if (!prev) return null;
@@ -371,10 +429,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
 
       const messages = {
-        confirmed: "Restaurant approved your campus bite!",
-        preparing: "Chef Ahmed is wraps preparing your meal!",
-        delivering: "Scooter driver Ahmed is speeding onto the campus roads! 🛵💨",
-        arrived: " আহমেদ has arrived at SQU library gate! Step outside to grab it! 🤩"
+        confirmed: "Order Confirmed. Preparing bulk preparation schedule.",
+        preparing: "Kitchen is preparing your meal!",
+        packed: "Meal is packed and ready for transport.",
+        transported: "Meal is being transported to the pickup station! 🚚",
+        ready: "Your meal is available for pickup! Check your QR code. 🤩",
+        collected: "Meal collected. Enjoy!"
       };
 
       addNotification(messages[status]);
@@ -390,12 +450,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (activeOrder.status === 'confirmed') {
         updateVendorOrderStatus(activeOrder.id, 'preparing');
       } else if (activeOrder.status === 'preparing') {
-        updateVendorOrderStatus(activeOrder.id, 'delivering');
-      } else if (activeOrder.status === 'delivering') {
-        updateVendorOrderStatus(activeOrder.id, 'arrived');
-      } else if (activeOrder.status === 'arrived') {
-        // Automatically close tracking window after arriving and push to past orders
+        updateVendorOrderStatus(activeOrder.id, 'packed');
+      } else if (activeOrder.status === 'packed') {
+        updateVendorOrderStatus(activeOrder.id, 'transported');
+      } else if (activeOrder.status === 'transported') {
+        updateVendorOrderStatus(activeOrder.id, 'ready');
+      } else if (activeOrder.status === 'ready') {
+        // Wait for manual collection in the real app, but auto-collect here for demo
         setTimeout(() => {
+          updateVendorOrderStatus(activeOrder.id, 'collected');
           completeActiveOrder();
         }, 15000);
       }
@@ -432,7 +495,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addNotification,
       markNotificationsRead,
       vendorOrders,
-      updateVendorOrderStatus
+      updateVendorOrderStatus,
+      orderMode,
+      setOrderMode,
+      isSystemOpen
     }}>
       {children}
     </AppContext.Provider>

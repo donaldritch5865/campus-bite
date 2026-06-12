@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { CAMPUSES, RESTAURANTS } from '@/mock/mockData';
-import { BarChart3, Users, DollarSign, Bike, ShieldCheck, ArrowUpRight, Award, Plus } from 'lucide-react';
+import { CAMPUSES, CORPORATE_LOCATIONS } from '@/mock/mockData';
+import { useApp } from '@/context/AppContext';
+import { BarChart3, Users, DollarSign, Bike, ShieldCheck, ArrowUpRight, Award, Plus, Settings } from 'lucide-react';
 import logoUrl from '@/assets/branding/logo.png';
 export const AdminDashboard: React.FC = () => {
+  const { orderMode, setOrderMode } = useApp();
+  const [activeUserType, setActiveUserType] = useState<'student' | 'bank_employee'>('student');
   const [approvedMerchants, setApprovedMerchants] = useState<{ [key: string]: boolean }>({
     'r1': true,
     'r2': true,
@@ -19,10 +22,10 @@ export const AdminDashboard: React.FC = () => {
 
   // Mock analytical stats
   const metrics = [
-    { name: 'Total Campus Users', value: '14,812', change: '+12.4%', icon: Users, color: 'text-amber-500 bg-amber-500/10' },
-    { name: 'Weekly GMV Revenue', value: 'OMR 2,490', change: '+18.2%', icon: DollarSign, color: 'text-emerald-500 bg-emerald-500/10' },
-    { name: 'Active Delivery Riders', value: '48', change: 'Live GPS', icon: Bike, color: 'text-blue-500 bg-blue-500/10' },
-    { name: 'Platform Satisfaction', value: '98.4%', change: 'Excellent', icon: Award, color: 'text-purple-500 bg-purple-500/10' }
+    { name: 'Total Pre-Orders Today', value: '1,412', change: '+12.4%', icon: Users, color: 'text-amber-500 bg-amber-500/10' },
+    { name: 'Total Revenue', value: 'OMR 2,490', change: '+18.2%', icon: DollarSign, color: 'text-emerald-500 bg-emerald-500/10' },
+    { name: 'Meals Packed', value: '1,385', change: 'Live Floor', icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10' },
+    { name: 'Collection Success', value: '98.4%', change: 'Excellent', icon: Award, color: 'text-purple-500 bg-purple-500/10' }
   ];
 
   return (
@@ -30,12 +33,12 @@ export const AdminDashboard: React.FC = () => {
       
       {/* Header title block */}
       <div className="space-y-1">
-        <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">Platform Admin Operations</span>
+        <span className="text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">Food Operations Control Center</span>
         <div className="flex items-center gap-3">
           <img src={logoUrl} alt="Campus Bite Logo" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,92,0,0.5)]" />
-          <h2 className="text-2xl font-black text-main leading-none">Campus Bite Central Command</h2>
+          <h2 className="text-2xl font-black text-main leading-none">Campus Bite Kitchen Command</h2>
         </div>
-        <p className="text-xs text-muted font-medium">Cross-campus platform parameters monitor</p>
+        <p className="text-xs text-muted font-medium">Cross-campus production and collection monitor</p>
       </div>
 
       {/* Grid of stats metrics */}
@@ -63,6 +66,41 @@ export const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Order Control Center */}
+      <div className="p-6 rounded-[2rem] bg-surface border border-subtle space-y-5">
+        <div className="flex justify-between items-center">
+          <h3 className="font-extrabold text-sm text-main uppercase tracking-wider flex items-center gap-2">
+            <Settings className="w-4.5 h-4.5 text-amber-500" />
+            Order Control Center
+          </h3>
+          <span className="text-[10px] text-muted font-bold uppercase tracking-wider">System Override</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <button
+            onClick={() => setOrderMode('scheduled')}
+            className={`p-4 rounded-2xl border transition-all text-left ${orderMode === 'scheduled' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-surface border-subtle text-muted hover:border-amber-500/30'}`}
+          >
+            <div className="font-black text-sm mb-1 text-main">Scheduled Mode</div>
+            <div className="text-[10px] leading-relaxed">Auto-opens 12:00 AM. Closes at 11:00 AM daily. (Default)</div>
+          </button>
+          <button
+            onClick={() => setOrderMode('force_open')}
+            className={`p-4 rounded-2xl border transition-all text-left ${orderMode === 'force_open' ? 'bg-emerald-500/10 border-emerald-500 text-emerald-500' : 'bg-surface border-subtle text-muted hover:border-emerald-500/30'}`}
+          >
+            <div className="font-black text-sm mb-1 text-main">Force Open Orders</div>
+            <div className="text-[10px] leading-relaxed">Manually override schedule. Students can place orders now.</div>
+          </button>
+          <button
+            onClick={() => setOrderMode('force_close')}
+            className={`p-4 rounded-2xl border transition-all text-left ${orderMode === 'force_close' ? 'bg-red-500/10 border-red-500 text-red-500' : 'bg-surface border-subtle text-muted hover:border-red-500/30'}`}
+          >
+            <div className="font-black text-sm mb-1 text-main">Force Close / Maint.</div>
+            <div className="text-[10px] leading-relaxed">Emergency override. Stops all incoming pre-orders immediately.</div>
+          </button>
+        </div>
+      </div>
+
       {/* Analytics Charts layout using beautiful raw SVG */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -71,9 +109,9 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-extrabold text-sm text-main uppercase tracking-wider flex items-center gap-2">
               <BarChart3 className="w-4.5 h-4.5 text-amber-500" />
-              Platform Weekly Sales Trend
+              Platform Daily Pre-Orders Trend
             </h3>
-            <span className="text-[10px] text-muted font-bold uppercase tracking-wider">OMR scale</span>
+            <span className="text-[10px] text-muted font-bold uppercase tracking-wider">Orders scale</span>
           </div>
 
           {/* SVG line graph */}
@@ -81,10 +119,10 @@ export const AdminDashboard: React.FC = () => {
             
             {/* Draw grid lines */}
             <div className="absolute inset-0 flex flex-col justify-between text-[9px] text-neutral-600 font-bold pointer-events-none pb-5">
-              <div className="border-b border-subtle pb-1 flex justify-between"><span>OMR 400</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
-              <div className="border-b border-subtle pb-1 flex justify-between"><span>OMR 300</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
-              <div className="border-b border-subtle pb-1 flex justify-between"><span>OMR 200</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
-              <div className="border-b border-subtle pb-1 flex justify-between"><span>OMR 100</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
+              <div className="border-b border-subtle pb-1 flex justify-between"><span>2,000</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
+              <div className="border-b border-subtle pb-1 flex justify-between"><span>1,500</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
+              <div className="border-b border-subtle pb-1 flex justify-between"><span>1,000</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
+              <div className="border-b border-subtle pb-1 flex justify-between"><span>500</span><hr className="w-full border-t border-dashed border-subtle mx-2 my-2"/></div>
             </div>
 
             {/* Line SVG */}
@@ -136,25 +174,42 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Campus Volume Heatmap (col 5) */}
         <div className="lg:col-span-5 p-6 rounded-[2rem] bg-surface border border-subtle space-y-4">
-          <h3 className="font-extrabold text-sm text-main uppercase tracking-wider flex items-center gap-2">
-            <ShieldCheck className="w-4.5 h-4.5 text-amber-500" />
-            Campus Orders Activity
-          </h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-extrabold text-sm text-main uppercase tracking-wider flex items-center gap-2">
+              <ShieldCheck className="w-4.5 h-4.5 text-amber-500" />
+              Station Volume By Type
+            </h3>
+            
+            <div className="flex bg-surface-elevated p-1 rounded-lg border border-subtle">
+              <button
+                onClick={() => setActiveUserType('student')}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${activeUserType === 'student' ? 'bg-amber-500 text-white' : 'text-muted'}`}
+              >
+                Students
+              </button>
+              <button
+                onClick={() => setActiveUserType('bank_employee')}
+                className={`px-3 py-1 text-[10px] font-bold rounded-md transition-colors ${activeUserType === 'bank_employee' ? 'bg-amber-500 text-white' : 'text-muted'}`}
+              >
+                Corporate
+              </button>
+            </div>
+          </div>
 
-          <div className="space-y-4 pt-1.5 text-xs text-left">
-            {CAMPUSES.map((c, idx) => {
+          <div className="space-y-4 pt-1.5 text-xs text-left max-h-60 overflow-y-auto no-scrollbar">
+            {(activeUserType === 'student' ? CAMPUSES : CORPORATE_LOCATIONS).map((c, idx) => {
               const percentages = ['44%', '24%', '15%', '10%', '7%'];
               const orderCounts = [412, 192, 110, 84, 42];
               return (
                 <div key={c.id} className="space-y-1.5">
                   <div className="flex justify-between items-center text-[11px] font-bold text-main/80">
-                    <span>{c.fullName} ({c.name})</span>
-                    <span className="font-black text-amber-500">{orderCounts[idx]} orders</span>
+                    <span>{c.fullName}</span>
+                    <span className="font-black text-amber-500">{orderCounts[idx % orderCounts.length]} pickups</span>
                   </div>
                   <div className="w-full bg-surface border border-subtle h-2 rounded-full overflow-hidden">
                     <div
                       className="bg-gradient-sunset h-full rounded-full"
-                      style={{ width: percentages[idx] }}
+                      style={{ width: percentages[idx % percentages.length] }}
                     />
                   </div>
                 </div>

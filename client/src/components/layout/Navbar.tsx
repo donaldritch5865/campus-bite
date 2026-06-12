@@ -37,14 +37,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
   };
 
   const navLinks = [
-    { name: 'Restaurants', path: '/restaurants' },
+    { name: 'Menu', path: '/menu' },
     { name: 'Deals', path: '/deals' },
-    { name: 'Favorites', path: '/favorites' },
-    { name: 'Orders', path: '/dashboard' } // Maps directly to standard dashboard past orders logs
+    { name: 'Saved Meals', path: '/favorites' },
+    { name: 'Orders', path: '/dashboard' }
   ];
 
   return (
-    <header className="fixed top-6 left-0 right-0 z-50 flex justify-center w-full px-4 transition-all duration-300">
+    <header className="fixed top-12 left-0 right-0 z-40 flex justify-center w-full px-4 transition-all duration-300">
       <div className="w-full max-w-[1050px] glass-navbar rounded-full px-5 py-2.5 flex items-center justify-between">
         
         {/* LOGO */}
@@ -88,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
           
           {/* SEARCH TRIGGER */}
           <button
-            onClick={() => navigate('/restaurants')}
+            onClick={() => navigate('/menu')}
             className="p-1.5 text-neutral-400 hover:text-[#FF5C00] transition-colors"
           >
             <Search className="w-[18px] h-[18px]" strokeWidth={2} />
@@ -181,6 +181,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCart }) => {
                     <span>{r} Dashboard</span>
                   </button>
                 ))}
+                <div className="h-px bg-main/5 my-1" />
+                <button
+                  onClick={() => {
+                    setShowRoleDropdown(false);
+                    localStorage.removeItem('cb_user');
+                    window.location.href = '/auth';
+                  }}
+                  className="w-full text-left text-[11px] font-bold uppercase tracking-wide px-3 py-2 rounded-lg text-red-500 hover:bg-red-500/10 block transition-colors"
+                >
+                  Log Out
+                </button>
               </div>
             )}
           </div>

@@ -99,10 +99,10 @@ export const FoodModal: React.FC<FoodModalProps> = ({ item, onClose }) => {
                   {item.badge}
                 </span>
               )}
-              <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-black/60 border border-subtle text-white/80 flex items-center gap-1">
-                <Clock className="w-3 h-3 text-amber-500" />
-                {item.deliveryTime} min
-              </span>
+              <div className="flex items-center gap-1.5 font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+                <Clock className="w-4 h-4 text-emerald-500" />
+                {item.remainingQuantity} portions left
+              </div>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export const FoodModal: React.FC<FoodModalProps> = ({ item, onClose }) => {
                 </span>
               </div>
               <p className="text-xs text-amber-500 font-bold uppercase tracking-wider mt-1">
-                {item.restaurantName}
+                {item.kitchenName}
               </p>
               <p className="text-xs text-muted mt-2.5 leading-relaxed">
                 {item.description}

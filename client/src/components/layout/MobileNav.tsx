@@ -8,9 +8,9 @@ export const MobileNav: React.FC = () => {
   const location = useLocation();
 
   const menuItems = [
-    { name: 'Fuel', path: '/restaurants', icon: Compass },
+    { name: 'Menu', path: '/menu', icon: Compass },
     { name: 'Deals', path: '/deals', icon: Flame, isStreak: true },
-    { name: 'Favs', path: '/favorites', icon: Heart },
+    { name: 'Saved', path: '/favorites', icon: Heart },
     { name: 'Dash', path: '/dashboard', icon: User }
   ];
 
@@ -20,10 +20,10 @@ export const MobileNav: React.FC = () => {
       {activeOrder && location.pathname !== '/tracking' && (
         <div className="md:hidden fixed bottom-24 left-4 right-4 z-40 bg-gradient-sunset p-3 rounded-2xl flex items-center justify-between shadow-[0_8px_24px_rgba(255,92,0,0.4)] animate-bounce">
           <div className="flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">🛵</span>
+            <span className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">🛍️</span>
             <div className="flex flex-col text-left">
-              <span className="text-[10px] text-white/70 font-semibold uppercase tracking-wider">Ahmed is arriving in</span>
-              <span className="text-sm font-black text-white">{activeOrder.eta} min • {activeOrder.building}</span>
+              <span className="text-[10px] text-white/70 font-semibold uppercase tracking-wider">Kitchen Preparation</span>
+              <span className="text-sm font-black text-white">Ready in {activeOrder.eta} min • {activeOrder.building}</span>
             </div>
           </div>
           <NavLink

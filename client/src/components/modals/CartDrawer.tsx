@@ -126,10 +126,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      <p className="text-[10px] text-amber-500 font-bold uppercase tracking-wide">
-                        {item.restaurantName}
-                      </p>
                       
+                      <div className="text-[10px] text-muted mt-0.5">
+                        Qty: {item.quantity} • {item.kitchenName}
+                      </div>
+
                       {/* Addons selected summary */}
                       {item.addonsSelected.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1.5">
@@ -225,9 +226,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   )}
 
                   <div className="flex justify-between text-muted">
-                    <span>Delivery Fee</span>
+                    <span>Pickup Fee</span>
                     <span className="font-semibold text-main">
-                      {deliveryFee === 0 ? 'FREE' : `OMR ${deliveryFee.toFixed(3)}`}
+                      FREE
                     </span>
                   </div>
 
@@ -247,7 +248,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 {/* Safe badge */}
                 <div className="flex items-center gap-1.5 justify-center text-[10px] text-muted font-semibold leading-none">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  <span>Campus safety certified contactless delivery drop</span>
+                  <span>Secure QR Code collection at campus stations</span>
                 </div>
 
                 {/* Checkout CTA */}

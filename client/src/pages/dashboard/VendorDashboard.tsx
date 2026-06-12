@@ -38,26 +38,36 @@ export const VendorDashboard: React.FC = () => {
     if (currentStatus === 'preparing') {
       return (
         <button
-          onClick={() => updateVendorOrderStatus(orderId, 'delivering')}
+          onClick={() => updateVendorOrderStatus(orderId, 'packed')}
           className="px-4 py-2 bg-gradient-sunset text-white font-black text-xs rounded-xl uppercase tracking-wider shadow-sm transition-transform active:scale-95 flex items-center gap-1"
         >
-          <span>Send Rider</span> 🛵
+          <span>Pack Meal</span> 📦
         </button>
       );
     }
-    if (currentStatus === 'delivering') {
+    if (currentStatus === 'packed') {
       return (
         <button
-          onClick={() => updateVendorOrderStatus(orderId, 'arrived')}
+          onClick={() => updateVendorOrderStatus(orderId, 'transported')}
+          className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white font-black text-xs rounded-xl uppercase tracking-wider shadow-sm transition-transform active:scale-95 flex items-center gap-1"
+        >
+          <span>Transport</span> 🚚
+        </button>
+      );
+    }
+    if (currentStatus === 'transported') {
+      return (
+        <button
+          onClick={() => updateVendorOrderStatus(orderId, 'ready')}
           className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-main font-black text-xs rounded-xl uppercase tracking-wider shadow-sm transition-transform active:scale-95"
         >
-          Mark Delivered
+          Mark Ready
         </button>
       );
     }
     return (
       <span className="px-3 py-1.5 bg-surface border border-subtle text-muted rounded-lg text-xs font-bold flex items-center gap-1">
-        <Check className="w-3.5 h-3.5 text-muted" /> Completed
+        <Check className="w-3.5 h-3.5 text-muted" /> {currentStatus === 'collected' ? 'Collected' : 'Ready'}
       </span>
     );
   };

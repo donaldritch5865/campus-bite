@@ -4,11 +4,12 @@ import { useApp } from '@/context/AppContext';
 import { FOOD_ITEMS, STUDENT_DEALS, MOCK_REVIEWS, TRENDING_MEALS, FoodItem } from '@/mock/mockData';
 import { Star, Clock, Heart, Flame, ArrowRight } from 'lucide-react';
 import { FoodModal } from '@/components/modals/FoodModal';
+import { CutoffTimer } from '@/components/ui/CutoffTimer';
 import { motion } from 'framer-motion';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { toggleFavorite, favorites } = useApp();
+  const { toggleFavorite, favorites, isSystemOpen } = useApp();
   const [selectedItem, setSelectedItem] = useState<FoodItem | null>(null);
 
   const popularItems = FOOD_ITEMS.slice(0, 5);
@@ -40,30 +41,35 @@ export const Home: React.FC = () => {
 
             {/* Main Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-[4.5rem] font-black text-main leading-[1.05] tracking-tighter font-sans">
-              Campus food, <br />
-              <span className="text-[#FF5C00] underline-accent">delivered smarter.</span>
+              Order Before Class. <br />
+              <span className="text-[#FF5C00] underline-accent">Pick Up At Lunch.</span>
             </h1>
 
             {/* Sub-headline */}
             <p className="text-muted text-sm sm:text-base leading-relaxed font-medium">
-              Affordable student meals from your favourite local cafés — delivered right to lecture halls, dorms and study spots across university campuses in Oman.
+              Pre-order your lunch before 11 AM and collect it from your Campus Bite pickup station during lunch hours. Fast, affordable and designed specifically for students.
             </p>
 
             {/* Action CTAs */}
             <div className="flex flex-wrap gap-5 pt-3">
               <button
-                onClick={() => navigate('/restaurants')}
-                className="flex items-center gap-2.5 bg-gradient-to-r from-[#FF7A00] to-[#E64A19] hover:from-[#FF8C00] hover:to-[#FF5C00] text-white px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-wider shadow-[0_10px_30px_rgba(255,92,0,0.4)] transition-transform active:scale-95"
+                disabled={!isSystemOpen}
+                onClick={() => navigate('/menu')}
+                className={`flex items-center gap-2.5 px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-wider shadow-lg transition-transform ${
+                  isSystemOpen 
+                    ? 'bg-gradient-to-r from-[#FF7A00] to-[#E64A19] hover:from-[#FF8C00] hover:to-[#FF5C00] text-white shadow-[0_10px_30px_rgba(255,92,0,0.4)] active:scale-95' 
+                    : 'bg-surface-elevated text-muted border border-subtle cursor-not-allowed opacity-80'
+                }`}
               >
-                <span>Order Now</span>
-                <ArrowRight className="w-4 h-4 text-white" strokeWidth={2.5} />
+                <span>{isSystemOpen ? 'Order Now' : 'Orders Closed'}</span>
+                {isSystemOpen && <ArrowRight className="w-4 h-4 text-white" strokeWidth={2.5} />}
               </button>
               
               <button
-                onClick={() => navigate('/restaurants')}
+                onClick={() => navigate('/menu')}
                 className="px-7 py-4 rounded-full bg-main/5 border border-subtle text-main hover:bg-main/10 transition-all text-[13px] font-black uppercase tracking-wider shadow-sm"
               >
-                Explore Restaurants
+                Browse Today's Meals
               </button>
             </div>
 
@@ -83,19 +89,19 @@ export const Home: React.FC = () => {
               {/* Text description metrics details */}
               <div className="flex gap-6 text-[11px] font-bold text-main/80">
                 <div className="text-left">
-                  <div>12k+ students</div>
-                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Active community</div>
+                  <div>12k+ Meals</div>
+                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Served Today</div>
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-0.5 text-amber-500">
                     <Star className="w-3.5 h-3.5 text-[#FF7A00] fill-[#FF7A00]" />
-                    4.9 avg rating
+                    98.4% Success
                   </div>
-                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Top Cafes</div>
+                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Pickup Rate</div>
                 </div>
                 <div className="text-left">
-                  <div>~18 min avg</div>
-                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Quick drops</div>
+                  <div>~45 sec avg</div>
+                  <div className="text-muted text-[9px] font-black uppercase tracking-wider mt-0.5">Pickup Time</div>
                 </div>
               </div>
 
@@ -138,8 +144,8 @@ export const Home: React.FC = () => {
               </div>
               <div className="text-left min-w-0 leading-tight">
                 <span className="text-[9px] font-extrabold uppercase text-muted tracking-wider">Late night fuel</span>
-                <div className="text-[12px] font-black text-main truncate">Karak Tea</div>
-                <div className="text-[10px] text-[#FF7A00] font-black mt-0.5">OMR 0.3 • 8 min</div>
+                <div className="text-[12px] font-black text-main truncate">Iced Saffron Latte</div>
+                <div className="text-[10px] text-[#FF7A00] font-black mt-0.5">OMR 0.6 • Pick up now</div>
               </div>
             </div>
 
@@ -157,15 +163,18 @@ export const Home: React.FC = () => {
           <div className="flex justify-between items-end">
             <div className="text-left space-y-1">
               <span className="text-[9px] sm:text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em] flex items-center gap-1">
-                🔥 POPULAR ON CAMPUS
+                🔥 TODAY'S MENU
               </span>
-              <h2 className="text-2xl sm:text-[1.75rem] font-extrabold text-main tracking-tight leading-none">
-                What students are <span className="text-[#FF5C00]">devouring</span> right now
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
+                <h2 className="text-2xl sm:text-[1.75rem] font-extrabold text-main tracking-tight leading-none">
+                  Meals closing <span className="text-[#FF5C00]">soon</span>
+                </h2>
+                <CutoffTimer cutoffTimeStr="11:00 AM" size="md" className="mb-0.5" />
+              </div>
             </div>
             
             <button
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="text-[10px] font-black uppercase tracking-wider text-muted hover:text-main px-3 py-1.5 rounded-full bg-main/5 border border-subtle transition-all flex items-center gap-1 pb-1.5"
             >
               See All <ArrowRight className="w-3.5 h-3.5 text-muted" />
@@ -221,17 +230,17 @@ export const Home: React.FC = () => {
                       </div>
                     </div>
                     
-                    <p className="text-[10px] text-muted font-semibold leading-none">
-                      {item.restaurantName}
+                    <p className="text-[10px] text-muted font-semibold leading-none mt-1">
+                      {item.calories} kcal • {item.protein}g protein
                     </p>
 
-                    <div className="flex justify-between items-center pt-2.5 border-t border-subtle">
+                    <div className="flex justify-between items-center pt-2.5 border-t border-subtle mt-2">
                       <span className="text-sm font-black text-[#FF5C00]">
                         OMR {item.price.toFixed(3)}
                       </span>
                       <div className="flex items-center gap-1 text-[9px] font-bold text-muted">
                         <Clock className="w-3 h-3 text-[#FF5C00]" />
-                        {item.deliveryTime} min
+                        {item.remainingQuantity} Left
                       </div>
                     </div>
                   </div>
@@ -258,7 +267,7 @@ export const Home: React.FC = () => {
             
             {/* Deal Box 1: Student Combos (Large - 1st row span 7) */}
             <div
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="md:col-span-7 p-6 sm:p-7.5 rounded-[2rem] bg-gradient-to-r from-[#FF7A00] to-[#FF5C00] text-main flex flex-col justify-between items-start min-h-[170px] shadow-[0_8px_30px_rgba(255,92,0,0.25)] hover:scale-[1.01] transition-transform cursor-pointer relative overflow-hidden group text-left"
             >
               <div className="absolute right-0 top-0 w-28 h-28 bg-main/5 rounded-full blur-2xl transform translate-x-8 -translate-y-8" />
@@ -271,7 +280,7 @@ export const Home: React.FC = () => {
 
             {/* Deal Box 2: Exam Week Deals (Medium - 1st row span 5) */}
             <div
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="md:col-span-5 p-6 sm:p-7.5 rounded-[2rem] bg-gradient-to-br from-[#E64A19] to-[#FF5C00] text-main flex flex-col justify-between items-start min-h-[170px] hover:scale-[1.01] transition-transform cursor-pointer text-left"
             >
               <div className="w-9 h-9 rounded-xl bg-main/15 flex items-center justify-center text-lg">📖</div>
@@ -283,7 +292,7 @@ export const Home: React.FC = () => {
 
             {/* Deal Box 3: Late Night (2nd row span 4) */}
             <div
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="md:col-span-4 p-6 sm:p-7.5 rounded-[2rem] bg-gradient-to-br from-[#1A1A1E] to-[#121214] border border-subtle text-main flex flex-col justify-between items-start min-h-[160px] hover:scale-[1.01] transition-transform cursor-pointer text-left"
             >
               <div className="w-9 h-9 rounded-xl bg-main/5 flex items-center justify-center text-lg">🌙</div>
@@ -295,7 +304,7 @@ export const Home: React.FC = () => {
 
             {/* Deal Box 4: Group Orders (2nd row span 4) */}
             <div
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="md:col-span-4 p-6 sm:p-7.5 rounded-[2rem] bg-gradient-to-br from-[#FF7A00] to-[#E64A19] text-main flex flex-col justify-between items-start min-h-[160px] hover:scale-[1.01] transition-transform cursor-pointer text-left"
             >
               <div className="w-9 h-9 rounded-xl bg-main/15 flex items-center justify-center text-lg">👥</div>
@@ -307,7 +316,7 @@ export const Home: React.FC = () => {
 
             {/* Deal Box 5: Budget Meals (2nd row span 4) */}
             <div
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="md:col-span-4 p-6 sm:p-7.5 rounded-[2rem] bg-gradient-to-br from-[#FF7A00] to-[#FF8C00] text-main flex flex-col justify-between items-start min-h-[160px] hover:scale-[1.01] transition-transform cursor-pointer text-left group"
             >
               <div className="w-9 h-9 rounded-xl bg-main/15 flex items-center justify-center text-lg">🪙</div>
@@ -323,35 +332,35 @@ export const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* ================= MOCK LIVE TRACKING PREVIEW ================= */}
+        {/* ================= MEAL STATUS TRACKER ================= */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-surface border border-subtle rounded-[2.5rem] p-6 sm:p-8 lg:p-12 text-left relative overflow-hidden">
           
           <div className="lg:col-span-5 space-y-4">
-            <span className="text-[9px] sm:text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">LIVE TRACKING</span>
+            <span className="text-[9px] sm:text-[10px] text-amber-500 font-extrabold uppercase tracking-[0.2em]">MEAL STATUS</span>
             <h2 className="text-2xl sm:text-[1.75rem] font-extrabold text-main tracking-tight leading-none">
-              Watch your meal <br className="hidden sm:inline" />
-              travel across <span className="text-[#FF5C00]">campus.</span>
+              Track your meal from <br className="hidden sm:inline" />
+              kitchen to <span className="text-[#FF5C00]">pickup.</span>
             </h2>
             <p className="text-muted text-xs sm:text-sm leading-relaxed">
-              Real-time GPS, glowing routes and ETAs accurate to the minute. Know exactly when to step outside the library.
+              We bulk prepare meals right before lunch time to guarantee maximum freshness. Get notified the second it's ready.
             </p>
 
             <div className="space-y-3 pt-4 text-xs font-semibold text-main/80">
               <div className="flex items-center gap-3">
                 <span className="w-5 h-5 rounded-full bg-[#FF5C00]/15 text-[#FF5C00] font-black flex items-center justify-center text-[9px]">✓</span>
-                <span>Order confirmed</span>
+                <span>Order Confirmed</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-5 h-5 rounded-full bg-[#FF5C00]/15 text-[#FF5C00] font-black flex items-center justify-center text-[9px]">✓</span>
-                <span>Being prepared</span>
+                <span>Kitchen Preparation</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-5 h-5 rounded-full bg-[#FF5C00]/15 text-[#FF5C00] font-black flex items-center justify-center text-[9px]">✓</span>
-                <span>Out for delivery</span>
+                <span>Meal Packed</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="w-5 h-5 rounded-full bg-surface-elevated text-muted font-black flex items-center justify-center text-[9px]">•</span>
-                <span className="text-muted">Arriving at SQU Gate 3</span>
+                <span className="text-muted">Transport Ready</span>
               </div>
             </div>
 
@@ -359,12 +368,12 @@ export const Home: React.FC = () => {
               onClick={() => navigate('/tracking')}
               className="mt-6 px-5 py-3 bg-surface hover:bg-surface-elevated border border-subtle hover:border-amber-500/20 text-[#FF5C00] font-black rounded-xl text-xs uppercase tracking-wider transition-all flex items-center gap-1.5"
             >
-              Open Track Console <ArrowRight className="w-3.5 h-3.5" />
+              Open Pickup Console <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Glowing Map Preview */}
-          <div className="lg:col-span-7 bg-background rounded-3xl border border-subtle h-80 relative overflow-hidden shadow-2xl flex items-center justify-center">
+          {/* Glowing Status Preview */}
+          <div className="lg:col-span-7 bg-background rounded-3xl border border-subtle h-80 relative overflow-hidden shadow-2xl flex items-center justify-center p-8">
             
             <svg className="absolute inset-0 w-full h-full text-main/[0.03]" xmlns="http://www.w3.org/2000/svg">
               <defs>
@@ -375,10 +384,10 @@ export const Home: React.FC = () => {
               <rect width="100%" height="100%" fill="url(#grid-home)" />
             </svg>
 
-            {/* Neon path */}
+            {/* Neon path connecting phases */}
             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
               <path
-                d="M 60 250 Q 180 160 300 180 T 460 90"
+                d="M 100 160 L 400 160"
                 fill="none"
                 stroke="#FF5C00"
                 strokeWidth="4"
@@ -387,39 +396,34 @@ export const Home: React.FC = () => {
               />
             </svg>
 
-            {/* Rider moving */}
-            <motion.div
-              animate={{
-                x: [-120, 20, 140],
-                y: [60, -20, -70]
-              }}
-              transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
-              className="absolute w-8 h-8 rounded-full bg-[#FF5C00] text-white flex items-center justify-center text-sm shadow-[0_0_12px_rgba(255,92,0,0.6)] z-10"
-            >
-              🛵
-            </motion.div>
-
-            {/* Destination marker */}
-            <div className="absolute right-[60px] top-[60px] flex flex-col items-center">
-              <div className="w-3.5 h-3.5 bg-emerald-500 rounded-full animate-ping absolute" />
-              <div className="w-3.5 h-3.5 bg-emerald-500 rounded-full border border-black z-10" />
-              <div className="mt-1 px-2.5 py-1 rounded-xl bg-surface border border-subtle text-[9px] font-black text-main whitespace-nowrap">
-                You
-              </div>
+            {/* Checkpoint Nodes */}
+            <div className="absolute inset-0 flex items-center justify-between px-16">
+               <div className="flex flex-col items-center gap-3 z-10 -mt-16">
+                 <div className="w-6 h-6 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] flex items-center justify-center text-white text-[10px]">✓</div>
+                 <span className="text-[10px] font-black text-emerald-500">Prepared</span>
+               </div>
+               <div className="flex flex-col items-center gap-3 z-10 -mt-16">
+                 <div className="w-8 h-8 rounded-full bg-[#FF5C00] shadow-[0_0_15px_rgba(255,92,0,0.8)] flex items-center justify-center text-white text-[10px] border-2 border-white/20 animate-pulse">📦</div>
+                 <span className="text-[10px] font-black text-[#FF5C00]">Packed</span>
+               </div>
+               <div className="flex flex-col items-center gap-3 z-10 -mt-16">
+                 <div className="w-6 h-6 rounded-full bg-surface-elevated border-2 border-subtle shadow-sm flex items-center justify-center text-muted text-[10px]">3</div>
+                 <span className="text-[10px] font-black text-muted">Ready</span>
+               </div>
             </div>
 
             {/* Simulated HUD */}
             <div className="absolute bottom-4 left-4 right-4 p-3.5 rounded-2xl glass-panel-heavy border border-subtle flex justify-between items-center text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-full bg-main/5 flex items-center justify-center text-base">Ahmed</span>
+                <span className="w-7 h-7 rounded-full bg-main/5 flex items-center justify-center text-base">🎒</span>
                 <div className="text-left leading-none">
-                  <div className="font-extrabold text-main">Ahmed</div>
-                  <span className="text-[8px] text-muted font-bold block mt-1">Rider ★ 4.9</span>
+                  <div className="font-extrabold text-main">Batch #428</div>
+                  <span className="text-[8px] text-muted font-bold block mt-1">SQU Engineering</span>
                 </div>
               </div>
               <div className="text-right leading-none">
-                <div className="text-[9px] text-[#FF5C00] font-black uppercase tracking-wider">Arriving in</div>
-                <div className="text-sm font-black text-main mt-1">8 min</div>
+                <div className="text-[9px] text-[#FF5C00] font-black uppercase tracking-wider">Ready at</div>
+                <div className="text-sm font-black text-main mt-1">12:30 PM</div>
               </div>
             </div>
 
@@ -536,16 +540,22 @@ export const Home: React.FC = () => {
 
           <div className="flex justify-center flex-wrap gap-4 pt-2">
             <button
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="bg-[#FF5C00] hover:bg-[#FF7A00] text-white px-7 py-3 rounded-full font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-500/10 transition-transform active:scale-95"
             >
-              Download the app
+              Browse Today's Meals
             </button>
             <button
-              onClick={() => navigate('/restaurants')}
+              onClick={() => navigate('/menu')}
               className="px-6 py-3 bg-surface-elevated text-main/80 font-bold text-xs rounded-full border border-subtle hover:bg-surface-elevated transition-all uppercase tracking-wider"
             >
-              For restaurants
+              Group Pre-orders
+            </button>
+            <button
+              onClick={() => navigate('/meal-plans')}
+              className="px-6 py-3 bg-surface-elevated text-main/80 font-bold text-xs rounded-full border border-subtle hover:bg-surface-elevated transition-all uppercase tracking-wider"
+            >
+              Meal Plans
             </button>
           </div>
 
